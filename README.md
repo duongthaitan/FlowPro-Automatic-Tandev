@@ -8,7 +8,7 @@
 
   <p>
     <a href="#">
-      <img src="https://img.shields.io/badge/Version-3.5-blue?style=for-the-badge&color=16C3DE" alt="Version">
+      <img src="https://img.shields.io/badge/Version-1.0-blue?style=for-the-badge&color=16C3DE" alt="Version">
     </a>
     <a href="#">
       <img src="https://img.shields.io/badge/Platform-Chrome_Extension-orange?style=for-the-badge&logo=google-chrome" alt="Platform">
