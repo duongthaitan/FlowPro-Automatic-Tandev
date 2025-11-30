@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Flow Downloader</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="bg-blob"></div>
+
+  <header class="header">
+    <div class="help-wrapper">
+      <div id="helpBtn" class="help-btn">?</div>
+      <div id="helpTooltip" class="tooltip">
+        <div class="tooltip-header">Hướng dẫn nhanh</div>
+        <ul class="step-list">
+          <li><span class="step-num">1</span> Nhập tên dự án.</li>
+          <li><span class="step-num">2</span> Bấm <b>Start Auto</b>.</li>
+          <li><span class="step-num">3</span> Giữ cửa sổ mở.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="logo-area">
+      <div class="logo-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </div>
+      <div class="logo-text">
+        <h1>Flow Downloader</h1>
+        <span class="badge">PRO</span>
+      </div>
+    </div>
+    <div class="sub-title">Product of Tandev.foto Studio</div>
+  </header>
+
+  <main class="container">
+    
+    <button id="btnSettings" class="btn-link">
+      <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Cấu hình thư mục lưu
+    </button>
+
+    <div class="card glass-effect">
+      <div class="input-group">
+        <label for="folderName">TÊN DỰ ÁN (FOLDER)</label>
+        <div class="input-wrapper">
+          <input type="text" id="folderName" placeholder="Nhập tên dự án..." value="Veo_Videos" autocomplete="off">
+          <span class="input-icon">📁</span>
+          <div class="input-border"></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="switch-row">
+        <div class="switch-info">
+          <span class="switch-title">Hỏi vị trí lưu từng file?</span>
+          <span class="switch-desc">Bật nếu bạn muốn chọn tay</span>
+        </div>
+        <div class="toggle-wrapper">
+          <input type="checkbox" id="askSave">
+          <label for="askSave" class="toggle-btn"></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-area">
+      <button id="btnStart" class="btn btn-primary shimmer">
+        <span class="icon">🚀</span> BẮT ĐẦU AUTO
+      </button>
+
+      <button id="btnStop" class="btn btn-danger shimmer" style="display: none;">
+        <span class="icon">⏹</span> DỪNG & TẢI NGAY
+      </button>
+    </div>
+
+    <div id="statusBox" class="status-container">
+      <div class="pulse-ring"></div>
+      <div class="status-content">
+        <span id="statusText">Sẵn sàng hoạt động</span>
+        <div class="counter-box">
+           <span id="countDisplay">0</span>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      Designed by <b>Tandev.foto</b>
+    </footer>
+  </main>
+
+  <script src="popup.js"></script>
+</body>
+</html>

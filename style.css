@@ -1,0 +1,196 @@
+/* --- 1. CORE & VARIABLES --- */
+:root {
+  /* Brand Colors RGB(22, 195, 222) */
+  --brand-primary: #16C3DE;
+  --brand-hover: #13a8c2;
+  --brand-gradient: linear-gradient(135deg, #16C3DE 0%, #0abfdc 100%);
+  --brand-shadow: rgba(22, 195, 222, 0.4);
+  
+  /* Text & BG */
+  --text-main: #2D3748;
+  --text-light: #718096;
+  --bg-body: #F7FAFC;
+  --bg-card: #FFFFFF;
+  
+  /* Effects */
+  --radius-xl: 24px;
+  --radius-lg: 16px;
+  --shadow-card: 0 10px 40px -10px rgba(0,0,0,0.08);
+  --shadow-btn: 0 8px 20px -6px var(--brand-shadow);
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+body {
+  width: 360px; margin: 0; padding: 0;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  overflow: hidden;
+  /* Hiệu ứng selection (bôi đen) theo màu brand */
+}
+::selection { background: var(--brand-primary); color: white; }
+
+/* Trang trí nền */
+.bg-blob {
+  position: absolute; top: -50px; left: -50px;
+  width: 200px; height: 200px;
+  background: var(--brand-primary);
+  filter: blur(80px); opacity: 0.15; z-index: -1;
+  animation: blobFloat 10s infinite alternate;
+}
+@keyframes blobFloat { from { transform: translate(0,0); } to { transform: translate(20px, 20px); } }
+
+/* --- 2. HEADER --- */
+.header {
+  background: var(--brand-gradient);
+  padding: 28px 24px 40px;
+  border-bottom-left-radius: 36px;
+  border-bottom-right-radius: 36px;
+  color: white; position: relative;
+  text-align: center;
+  box-shadow: 0 15px 30px -5px rgba(22, 195, 222, 0.3);
+}
+
+.logo-area { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 6px; }
+.logo-icon {
+  background: rgba(255,255,255,0.2); width: 42px; height: 42px;
+  border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.3);
+}
+.logo-text { text-align: left; }
+.header h1 { margin: 0; font-size: 19px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
+.badge { font-size: 8px; background: white; color: var(--brand-hover); padding: 2px 6px; border-radius: 6px; font-weight: 800; display: inline-block; margin-top: 3px; }
+.sub-title { font-size: 11px; opacity: 0.85; font-weight: 500; letter-spacing: 0.5px; }
+
+/* Help Button */
+.help-btn {
+  position: absolute; top: 20px; right: 20px;
+  width: 30px; height: 30px;
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px; cursor: pointer; transition: var(--transition);
+}
+.help-btn:hover, .help-btn.active { background: white; color: var(--brand-primary); transform: rotate(15deg); }
+
+/* Tooltip */
+.tooltip {
+  position: absolute; top: 60px; right: 20px; width: 220px;
+  background: white; padding: 16px; border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+  opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.95);
+  transition: var(--transition); text-align: left; z-index: 100;
+}
+.tooltip.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+.tooltip-header { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--brand-primary); margin-bottom: 10px; border-bottom: 2px solid #F0F4F8; padding-bottom: 6px; }
+.step-list { list-style: none; padding: 0; margin: 0; }
+.step-list li { font-size: 12px; color: var(--text-light); margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+.step-num { background: #E0FCFF; color: var(--brand-primary); width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; }
+
+/* --- 3. CONTAINER --- */
+/* Hiệu ứng trượt lên khi mở popup */
+.container { 
+  padding: 0 24px 24px; margin-top: -30px; position: relative; z-index: 10; 
+  animation: slideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Settings Link */
+.btn-link {
+  background: white; border: none; color: var(--text-light);
+  font-size: 11px; font-weight: 600; padding: 8px 16px; border-radius: 20px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin: 0 auto 16px; width: fit-content; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  transition: var(--transition);
+}
+.btn-link .icon-sm { width: 14px; height: 14px; }
+.btn-link:hover { color: var(--brand-primary); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+
+/* --- 4. CARD --- */
+.card {
+  background: var(--bg-card); border-radius: var(--radius-xl); padding: 22px;
+  box-shadow: var(--shadow-card); position: relative; overflow: hidden;
+}
+/* Hiệu ứng Glass nhẹ */
+.glass-effect { backdrop-filter: blur(10px); }
+
+.input-group label { font-size: 10px; font-weight: 800; color: #A0AEC0; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: block; }
+.input-wrapper { position: relative; }
+.input-wrapper input {
+  width: 100%; padding: 14px 14px 14px 44px;
+  border: 2px solid #EDF2F7; border-radius: 14px;
+  font-size: 14px; font-weight: 600; color: var(--text-main);
+  background: #F8FAFC; outline: none; transition: var(--transition);
+}
+.input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); opacity: 0.5; font-size: 16px; }
+
+/* Hiệu ứng viền input khi focus */
+.input-wrapper input:focus { background: white; border-color: transparent; box-shadow: 0 0 0 2px var(--brand-primary); }
+
+.divider { height: 1px; background: #EDF2F7; margin: 18px 0; }
+
+/* Switch */
+.switch-row { display: flex; justify-content: space-between; align-items: center; }
+.switch-title { display: block; font-size: 13px; font-weight: 600; color: var(--text-main); }
+.switch-desc { font-size: 10px; color: var(--text-light); }
+.toggle-wrapper { position: relative; }
+.toggle-wrapper input { display: none; }
+.toggle-btn {
+  display: block; width: 48px; height: 26px; background: #CBD5E0;
+  border-radius: 99px; position: relative; cursor: pointer; transition: 0.3s;
+}
+.toggle-btn::after {
+  content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px;
+  background: white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+input:checked + .toggle-btn { background: var(--brand-primary); }
+input:checked + .toggle-btn::after { transform: translateX(22px); }
+
+/* --- 5. BUTTONS --- */
+.action-area { margin-top: 24px; }
+.btn {
+  width: 100%; border: none; padding: 18px; border-radius: var(--radius-lg);
+  font-size: 15px; font-weight: 700; color: white; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: var(--transition); position: relative; overflow: hidden;
+}
+.btn:active { transform: scale(0.98); }
+
+.btn-primary { background: var(--brand-primary); box-shadow: var(--shadow-btn); }
+.btn-primary:hover { background: var(--brand-hover); box-shadow: 0 12px 30px -5px rgba(22, 195, 222, 0.6); transform: translateY(-2px); }
+
+.btn-danger { background: #FC8181; box-shadow: 0 8px 20px rgba(252, 129, 129, 0.4); }
+.btn-danger:hover { background: #F56565; }
+
+/* Hiệu ứng Shimmer (Quét sáng) trên nút */
+.shimmer::after {
+  content: ""; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+  transform: skewX(-25deg); animation: shimmer 3s infinite;
+}
+@keyframes shimmer { 100% { left: 200%; } }
+
+/* --- 6. STATUS --- */
+.status-container { margin-top: 24px; text-align: center; position: relative; display: flex; flex-direction: column; align-items: center; }
+.status-content { position: relative; z-index: 2; }
+#statusText { font-size: 12px; font-weight: 600; color: var(--text-light); margin-bottom: 6px; display: block; transition: color 0.3s; }
+
+.counter-box {
+  background: white; padding: 5px 20px; border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: inline-block;
+  border: 1px solid #EDF2F7;
+}
+#countDisplay { font-size: 28px; font-weight: 800; color: var(--text-main); line-height: 1; transition: color 0.3s; }
+
+.pulse-ring {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 80px; height: 80px; background: rgba(22, 195, 222, 0.15);
+  border-radius: 50%; z-index: 1; opacity: 0;
+}
+.running .pulse-ring { animation: pulse 1.5s infinite; opacity: 1; }
+.running #countDisplay { color: var(--brand-primary); }
+.running #statusText { color: var(--brand-primary); }
+
+@keyframes pulse { 0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.8; } 100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; } }
+
+.footer { text-align: center; font-size: 10px; color: #CBD5E0; margin-top: 24px; font-weight: 500; }
+.footer b { color: #A0AEC0; }
