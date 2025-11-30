@@ -1,10 +1,12 @@
 // =========================================================
-// UI LOGIC
+// UI LOGIC (Preview, Help, Settings)
 // =========================================================
 const helpBtn = document.getElementById('helpBtn');
 const helpTooltip = document.getElementById('helpTooltip');
-const statusBox = document.getElementById('statusBox');
+const filePatternInput = document.getElementById('filePattern');
+const filenamePreview = document.getElementById('filenamePreview');
 
+// 1. Help Toggle
 if (helpBtn && helpTooltip) {
     helpBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -19,9 +21,30 @@ if (helpBtn && helpTooltip) {
     });
 }
 
+// 2. Settings Link
 document.getElementById('btnSettings').addEventListener('click', () => {
     chrome.tabs.create({ url: 'chrome://settings/downloads' });
 });
+
+// 3. Live Preview Logic
+function updatePreview() {
+    let pattern = filePatternInput.value.trim();
+    if (!pattern) pattern = "video_{index}"; // Gợi ý mặc định
+
+    // Giả lập ngày giờ
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    const timeStr = "14h30";
+
+    let preview = pattern;
+    preview = preview.replace(/{index}/g, "1");
+    preview = preview.replace(/{date}/g, dateStr);
+    preview = preview.replace(/{time}/g, timeStr);
+    
+    filenamePreview.innerText = preview + ".mp4";
+}
+filePatternInput.addEventListener('input', updatePreview);
+updatePreview(); // Chạy 1 lần lúc mở
 
 // =========================================================
 // CORE FUNCTIONALITY
@@ -31,20 +54,25 @@ const btnStart = document.getElementById('btnStart');
 const btnStop = document.getElementById('btnStop');
 const folderInput = document.getElementById('folderName');
 const askSaveCheckbox = document.getElementById('askSave');
+const modeSelect = document.getElementById('downloadMode');
 const statusText = document.getElementById('statusText');
+const statusBox = document.getElementById('statusBox');
 
 // START
 btnStart.addEventListener('click', async () => {
     let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     
-    // Update UI
+    // UI Update
     btnStart.style.display = 'none';
     btnStop.style.display = 'flex';
     folderInput.disabled = true;
+    filePatternInput.disabled = true;
     askSaveCheckbox.disabled = true;
+    modeSelect.disabled = true;
     
     statusBox.classList.add('running');
-    statusText.innerText = "Đang quét dữ liệu...";
+    statusText.innerText = "Đang quét và cuộn...";
+    statusText.style.color = "#16C3DE";
     
     chrome.runtime.onMessage.addListener(handleMessage);
 
@@ -74,38 +102,50 @@ function handleMessage(request) {
 }
 
 function processDownload(links) {
-    const folderRaw = folderInput.value.trim();
-    const folderName = folderRaw.replace(/[<>:"/\\|?*]+/g, '_') || "Veo_Videos";
+    // 1. Tự động điền nếu trống
+    let folderRaw = folderInput.value.trim();
+    if (!folderRaw) folderRaw = "Veo_Videos";
+    const folderName = folderRaw.replace(/[<>:"/\\|?*]+/g, '_');
+    
+    let patternRaw = filePatternInput.value.trim();
+    if (!patternRaw) patternRaw = "video_{index}";
+    
     const askSave = askSaveCheckbox.checked;
+    const selectedMode = modeSelect.value;
 
     statusBox.classList.remove('running');
     const reversedLinks = links.reverse();
 
     if (reversedLinks.length > 0) {
         statusText.innerText = "Hoàn tất! Đang tải...";
+        statusText.style.color = "#00b894";
+        
         chrome.runtime.sendMessage({
             action: "start_download",
             links: reversedLinks,
             folder: folderName,
-            saveAs: askSave
+            pattern: patternRaw,
+            saveAs: askSave,
+            mode: selectedMode
         });
     } else {
         statusText.innerText = "Không tìm thấy video nào";
+        statusText.style.color = "#e53e3e";
     }
 
     // Reset UI
     btnStart.style.display = 'flex';
     btnStop.style.display = 'none';
     folderInput.disabled = false;
+    filePatternInput.disabled = false;
     askSaveCheckbox.disabled = false;
+    modeSelect.disabled = false;
     chrome.runtime.onMessage.removeListener(handleMessage);
 }
-
 
 // =========================================================
 // CONTENT SCRIPT
 // =========================================================
-
 async function startUniversalScroll() {
     window.capturedVideos = new Set();
     window.isScanning = true;

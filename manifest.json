@@ -1,23 +1,21 @@
 {
   "manifest_version": 3,
   "name": "Flow Downloader Auto | Tandev.foto",
-  "version": "3.5",
-  "description": "Tool tải video tự động hàng loạt bản quyền Tandev.foto Studio",
+  "version": "1.0.0",
+  "description": "Tool tải video tự động với Giao diện thân thiện & Smart Queue.",
   "permissions": [
     "activeTab",
     "scripting",
     "downloads"
   ],
-  
   "icons": {
     "16": "icon16.png",
     "32": "icon32.png",
     "128": "icon128.png"
   },
-
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Mở Flow Downloader",
+    "default_title": "Flow Downloader",
     "default_icon": {
       "16": "icon16.png",
       "32": "icon32.png"

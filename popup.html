@@ -16,11 +16,11 @@
     <div class="help-wrapper">
       <div id="helpBtn" class="help-btn">?</div>
       <div id="helpTooltip" class="tooltip">
-        <div class="tooltip-header">Hướng dẫn sử dụng</div>
+        <div class="tooltip-header">Mẹo đặt tên file</div>
         <ul class="step-list">
-          <li><span class="step-num">1</span> Nhập tên dự án.</li>
-          <li><span class="step-num">2</span> Bấm <b>Start Auto</b>.</li>
-          <li><span class="step-num">3</span> Giữ cửa sổ mở.</li>
+          <li><code>{index}</code> : Số thứ tự (1, 2, 3...)</li>
+          <li><code>{date}</code> : Ngày hôm nay</li>
+          <li><code>{time}</code> : Giờ hiện tại</li>
         </ul>
       </div>
     </div>
@@ -31,35 +31,60 @@
       </div>
       <div class="logo-text">
         <h1>Flow Downloader</h1>
-        <span class="badge">PRO</span>
+        <span class="badge">EASY</span>
       </div>
     </div>
-    <div class="sub-title">Product of Tandev.foto</div>
+    <div class="sub-title">Product of Tandev.foto Studio</div>
   </header>
 
   <main class="container">
     
-    <button id="btnSettings" class="btn-link">
-      <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      Cấu hình thư mục lưu
-    </button>
-
     <div class="card glass-effect">
+      
       <div class="input-group">
-        <label for="folderName">TÊN DỰ ÁN (FOLDER)</label>
+        <label for="folderName">Lưu vào thư mục tên gì?</label>
         <div class="input-wrapper">
-          <input type="text" id="folderName" placeholder="Nhập tên dự án..." value="Veo_Videos" autocomplete="off">
+          <input type="text" id="folderName" placeholder="Ví dụ: Du_Lich_Da_Lat" value="" autocomplete="off">
           <span class="input-icon">📁</span>
-          <div class="input-border"></div>
+        </div>
+      </div>
+
+      <div class="input-group" style="margin-top: 15px;">
+        <label for="filePattern">
+          Đặt tên file như thế nào?
+          <span class="info-badge">Hot</span>
+        </label>
+        <div class="input-wrapper">
+          <input type="text" id="filePattern" placeholder="Ví dụ: Video_cua_Tan_{index}" value="" autocomplete="off">
+          <span class="input-icon">✎</span>
+        </div>
+        <div class="preview-box">
+          Kết quả mẫu: <span id="filenamePreview" class="preview-text">video_1.mp4</span>
+        </div>
+      </div>
+
+      <div class="input-group" style="margin-top: 15px;">
+        <label for="downloadMode">Tốc độ tải</label>
+        <div class="input-wrapper">
+          <select id="downloadMode">
+            <option value="fast">⚡ Nhanh (Dành cho ít video)</option>
+            <option value="safe" selected>🛡️ Ổn định (Dành cho >50 video)</option>
+          </select>
+          <span class="select-arrow">▼</span>
         </div>
       </div>
 
       <div class="divider"></div>
 
+      <button id="btnSettings" class="btn-settings-internal">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Đổi thư mục lưu mặc định của Chrome
+      </button>
+
       <div class="switch-row">
         <div class="switch-info">
           <span class="switch-title">Hỏi vị trí lưu từng file?</span>
-          <span class="switch-desc">Bật nếu bạn muốn chọn tay</span>
+          <span class="switch-desc">Tắt đi để tải tự động hoàn toàn</span>
         </div>
         <div class="toggle-wrapper">
           <input type="checkbox" id="askSave">
@@ -70,27 +95,23 @@
 
     <div class="action-area">
       <button id="btnStart" class="btn btn-primary shimmer">
-        <span class="icon">🚀</span> BẮT ĐẦU AUTO
+        <span class="icon">🚀</span> BẮT ĐẦU QUÉT & TẢI
       </button>
 
       <button id="btnStop" class="btn btn-danger shimmer" style="display: none;">
-        <span class="icon">⏹</span> DỪNG & TẢI NGAY
+        <span class="icon">⏹</span> DỪNG LẠI
       </button>
     </div>
 
     <div id="statusBox" class="status-container">
       <div class="pulse-ring"></div>
       <div class="status-content">
-        <span id="statusText">Sẵn sàng hoạt động</span>
-        <div class="counter-box">
-           <span id="countDisplay">0</span>
-        </div>
+        <span id="statusText">Sẵn sàng</span>
+        <div class="counter-box"><span id="countDisplay">0</span></div>
       </div>
     </div>
 
-    <footer class="footer">
-      Designed by <b>Tandev.foto</b>
-    </footer>
+    <footer class="footer">Designed by <b>Tandev.foto</b></footer>
   </main>
 
   <script src="popup.js"></script>
