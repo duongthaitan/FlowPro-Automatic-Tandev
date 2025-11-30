@@ -1,8 +1,3 @@
-Dưới đây là file `README.md` được viết lại hoàn chỉnh, chuyên nghiệp và khớp 100% với các tính năng (Giao diện 1 nút, Đặt tên file, Chế độ tải) của phiên bản **Flow Downloader Auto v4.5** mà chúng ta vừa hoàn thiện.
-
-Bạn hãy copy nội dung này vào file `README.md` trong thư mục dự án nhé.
-
-````markdown
 <div align="center">
 
   <img src="icon128.png" alt="logo" width="100" height="100" />
@@ -84,32 +79,26 @@ Flow-Downloader/
 ├── popup.js        # Logic xử lý chính (UI, Preview, Events)
 ├── background.js   # Xử lý Hàng đợi & Đổi tên file
 └── icons/          # Bộ icon thương hiệu
-````
-
-## ⚠️ Khắc phục lỗi thường gặp
-
-### 🔴 Lỗi: Chrome cứ hỏi "Lưu vào đâu?" liên tục?
-
+⚠️ Khắc phục lỗi thường gặp
+🔴 Lỗi: Chrome cứ hỏi "Lưu vào đâu?" liên tục?
 Đây là do cài đặt bảo mật của Chrome chặn quyền tự động lưu của Extension.
 
-**Cách sửa:**
+Cách sửa:
 
-1.  Mở tab mới, nhập: `chrome://settings/downloads`
-2.  Tìm dòng: **"Ask where to save each file before downloading"** (Hỏi vị trí lưu từng tệp...).
-3.  **Gạt TẮT nó đi (Màu xám)**.
-4.  Quay lại Tool, tắt nút gạt "Hỏi vị trí lưu" và thử lại.
+Mở tab mới, nhập: chrome://settings/downloads
 
-### 🔴 Lỗi: Không tìm thấy video nào?
+Tìm dòng: "Ask where to save each file before downloading" (Hỏi vị trí lưu từng tệp...).
 
-  * Hãy **F5 (Tải lại)** trang web.
-  * Đợi trang web load xong danh sách video đầu tiên rồi hãy bật Tool.
+Gạt TẮT nó đi (Màu xám).
 
------
+Quay lại Tool, tắt nút gạt "Hỏi vị trí lưu" và thử lại.
 
-\<div align="center"\>
-\<i\>Developed by \<b\>Tandev.foto Studio\</b\>\</i\><br>
-\<i\>© 2025 All Rights Reserved.\</i\>
-\</div\>
+🔴 Lỗi: Không tìm thấy video nào?
+Hãy F5 (Tải lại) trang web.
 
-```
-```
+Đợi trang web load xong danh sách video đầu tiên rồi hãy bật Tool.
+
+<div align="center"> <i>Developed by <b>Tandev.foto Studio</b></i>
+
+
+<i>© 2025 All Rights Reserved.</i> </div>
