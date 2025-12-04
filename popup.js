@@ -29,9 +29,8 @@ document.getElementById('btnSettings').addEventListener('click', () => {
 // 3. Live Preview Logic
 function updatePreview() {
     let pattern = filePatternInput.value.trim();
-    if (!pattern) pattern = "video_{index}"; // Gợi ý mặc định
+    if (!pattern) pattern = "video_{index}";
 
-    // Giả lập ngày giờ
     const now = new Date();
     const dateStr = now.toISOString().split('T')[0];
     const timeStr = "14h30";
@@ -43,8 +42,10 @@ function updatePreview() {
     
     filenamePreview.innerText = preview + ".mp4";
 }
-filePatternInput.addEventListener('input', updatePreview);
-updatePreview(); // Chạy 1 lần lúc mở
+if (filePatternInput) {
+    filePatternInput.addEventListener('input', updatePreview);
+    updatePreview();
+}
 
 // =========================================================
 // CORE FUNCTIONALITY
@@ -58,113 +59,103 @@ const modeSelect = document.getElementById('downloadMode');
 const statusText = document.getElementById('statusText');
 const statusBox = document.getElementById('statusBox');
 
-// START
+// START BUTTON
 btnStart.addEventListener('click', async () => {
     let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     
-    // UI Update
+    // 1. Lấy config
+    let folderRaw = folderInput.value.trim() || "Tandev_Videos";
+    const folderName = folderRaw.replace(/[<>:"/\\|?*]+/g, '_');
+    
+    let patternRaw = filePatternInput.value.trim() || "video_{index}";
+    const askSave = askSaveCheckbox.checked;
+    const selectedMode = modeSelect.value;
+
+    // 2. Update UI
     btnStart.style.display = 'none';
     btnStop.style.display = 'flex';
-    folderInput.disabled = true;
-    filePatternInput.disabled = true;
-    askSaveCheckbox.disabled = true;
-    modeSelect.disabled = true;
+    disableInputs(true);
     
     statusBox.classList.add('running');
-    statusText.innerText = "Đang quét và cuộn...";
+    statusText.innerText = "Đang quét... (Có thể đóng popup)";
     statusText.style.color = "#16C3DE";
     
+    // 3. Gửi Config xuống Background (để background lo liệu việc tải)
+    chrome.runtime.sendMessage({
+        action: "save_config",
+        config: { folder: folderName, pattern: patternRaw, saveAs: askSave, mode: selectedMode }
+    });
+
+    // 4. Lắng nghe cập nhật số lượng (chỉ khi popup còn mở)
     chrome.runtime.onMessage.addListener(handleMessage);
 
+    // 5. Chạy Script quét
     chrome.scripting.executeScript({
         target: { tabId: tab.id },
         func: startUniversalScroll
     });
 });
 
-// STOP
+// STOP BUTTON
 btnStop.addEventListener('click', async () => {
     let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    statusBox.classList.remove('running');
     chrome.scripting.executeScript({
         target: { tabId: tab.id },
-        func: forceStopAndReturn
+        func: () => { window.isScanning = false; }
     });
+    resetUI();
+    statusText.innerText = "Đã dừng quét.";
 });
 
 function handleMessage(request) {
     if (request.action === "update_count") {
         document.getElementById('countDisplay').innerText = request.count;
     }
-    if (request.action === "finished_scan") {
-        processDownload(request.links);
+    if (request.action === "scan_complete_notification") {
+        statusText.innerText = "Đã gửi lệnh tải xuống!";
+        statusText.style.color = "#00b894";
+        resetUI();
     }
 }
 
-function processDownload(links) {
-    // 1. Tự động điền nếu trống
-    let folderRaw = folderInput.value.trim();
-    if (!folderRaw) folderRaw = "Veo_Videos";
-    const folderName = folderRaw.replace(/[<>:"/\\|?*]+/g, '_');
-    
-    let patternRaw = filePatternInput.value.trim();
-    if (!patternRaw) patternRaw = "video_{index}";
-    
-    const askSave = askSaveCheckbox.checked;
-    const selectedMode = modeSelect.value;
+function disableInputs(disabled) {
+    folderInput.disabled = disabled;
+    filePatternInput.disabled = disabled;
+    askSaveCheckbox.disabled = disabled;
+    modeSelect.disabled = disabled;
+}
 
+function resetUI() {
     statusBox.classList.remove('running');
-    const reversedLinks = links.reverse();
-
-    if (reversedLinks.length > 0) {
-        statusText.innerText = "Hoàn tất! Đang tải...";
-        statusText.style.color = "#00b894";
-        
-        chrome.runtime.sendMessage({
-            action: "start_download",
-            links: reversedLinks,
-            folder: folderName,
-            pattern: patternRaw,
-            saveAs: askSave,
-            mode: selectedMode
-        });
-    } else {
-        statusText.innerText = "Không tìm thấy video nào";
-        statusText.style.color = "#e53e3e";
-    }
-
-    // Reset UI
     btnStart.style.display = 'flex';
     btnStop.style.display = 'none';
-    folderInput.disabled = false;
-    filePatternInput.disabled = false;
-    askSaveCheckbox.disabled = false;
-    modeSelect.disabled = false;
-    chrome.runtime.onMessage.removeListener(handleMessage);
+    disableInputs(false);
 }
 
 // =========================================================
-// CONTENT SCRIPT
+// INJECTED SCRIPT (Chạy bên trong trang web)
 // =========================================================
 async function startUniversalScroll() {
     window.capturedVideos = new Set();
     window.isScanning = true;
     
     const collectLinks = () => {
-        const containers = document.querySelectorAll('.sc-7c2943cd-3, div[class*="sc-"]');
-        containers.forEach(div => {
-            const video = div.querySelector('video');
-            if (video) {
-                let src = video.src || (video.querySelector('source') ? video.querySelector('source').src : null);
-                if (src && src.startsWith('http')) window.capturedVideos.add(src);
+        // Tối ưu selector: Quét mọi thẻ video
+        const videos = document.querySelectorAll('video');
+        videos.forEach(video => {
+            // Ưu tiên src trực tiếp hoặc source con
+            let src = video.src;
+            if (!src && video.querySelector('source')) {
+                src = video.querySelector('source').src;
+            }
+            
+            // Chỉ lấy link http/https (bỏ blob nếu không xử lý được)
+            if (src && src.startsWith('http')) {
+                window.capturedVideos.add(src);
             }
         });
-        
-        document.querySelectorAll('video').forEach(v => {
-            let src = v.src || (v.querySelector('source') ? v.querySelector('source').src : null);
-            if (src && src.startsWith('http')) window.capturedVideos.add(src);
-        });
 
+        // Gửi số lượng về popup (nếu popup đang mở)
         try { chrome.runtime.sendMessage({ action: "update_count", count: window.capturedVideos.size }); } catch (e) {}
     };
 
@@ -191,7 +182,14 @@ async function startUniversalScroll() {
     let sameHeightCount = 0;
 
     const scrollInterval = setInterval(() => {
-        if (!window.isScanning) { clearInterval(scrollInterval); return; }
+        if (!window.isScanning) { 
+            clearInterval(scrollInterval);
+            // Nếu bấm Stop, vẫn gửi những gì đã quét được
+            const finalLinks = Array.from(window.capturedVideos);
+            chrome.runtime.sendMessage({ action: "finished_scan_data", links: finalLinks });
+            return; 
+        }
+
         collectLinks();
 
         let currentScrollHeight;
@@ -210,24 +208,27 @@ async function startUniversalScroll() {
             lastScrollHeight = currentScrollHeight;
         }
 
-        if (sameHeightCount >= 3000) {
+        // Tự động dừng sau 3 giây không load thêm nội dung mới
+        if (sameHeightCount >= 3000) { 
             clearInterval(scrollInterval);
             finishScan(scroller);
         }
     }, 200);
 
     const finishScan = async (scrollerInfo) => {
+        // Cuộn lên đầu trang một chút để kích hoạt các element lazyload (nếu cần)
         if (scrollerInfo.type === 'window') window.scrollTo(0, 0); 
         else scrollerInfo.element.scrollTop = 0;
+        
         await new Promise(r => setTimeout(r, 1000));
-        collectLinks();
+        collectLinks(); // Quét lần cuối
+        
         const finalLinks = Array.from(window.capturedVideos);
-        chrome.runtime.sendMessage({ action: "finished_scan", links: finalLinks });
+        
+        // Gửi dữ liệu về Background để xử lý tải (Popup có đóng cũng không sao)
+        chrome.runtime.sendMessage({ action: "finished_scan_data", links: finalLinks });
+        
+        // Báo cho popup biết
+        try { chrome.runtime.sendMessage({ action: "scan_complete_notification" }); } catch(e) {}
     };
-}
-
-function forceStopAndReturn() {
-    window.isScanning = false;
-    const finalLinks = Array.from(window.capturedVideos || []);
-    chrome.runtime.sendMessage({ action: "finished_scan", links: finalLinks });
 }
