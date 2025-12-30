@@ -1,239 +1,187 @@
 // =========================================================
-// BACKGROUND WORKER | Tandev.foto
+// BACKGROUND WORKER | Flow Downloader Auto
 // =========================================================
 
 let downloadQueue = [];
 let activeDownloads = 0;
-let MAX_CONCURRENT = 3;
-let isBatchRunning = false; // Biến cờ để biết đang trong đợt tải
+const MAX_CONCURRENT = 5; // Optimized for Speed (Default)
+let isBatchRunning = false;
+let totalFilesInitial = 0;
 
-// Cấu hình mặc định
+// Default Config
 let currentConfig = {
-  folder: "Videos",
-  pattern: "video_{index}",
-  saveAs: false,
-  mode: "safe",
+    folder: "Flow_Videos",
+    pattern: "video_{index}"
 };
 
-// =========================================================
-// 1. SOUND & NOTIFICATION UTILS (ĐÃ NÂNG CẤP)
-// =========================================================
-
-function showFinishedNotification(totalFiles) {
-  // 1. Hiện thông báo Visual
-  chrome.notifications.create({
-    type: "basic",
-    iconUrl: "icon128.png",
-    title: "Flow Downloader",
-    message: `✅ Đã tải xong toàn bộ ${totalFiles} video!`,
-    priority: 2,
-  });
-
-  // 2. Phát âm thanh (Inject vào tab đang mở để phát)
-  playLoudSuccessSound();
-}
-
-async function playLoudSuccessSound() {
-  // Tìm tab đang active để mượn nó phát tiếng
-  try {
-    const [tab] = await chrome.tabs.query({
-      active: true,
-      lastFocusedWindow: true,
-    });
-    if (tab) {
-      chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: () => {
-          // TẠO ÂM THANH LỚN VÀ LẶP LẠI
-          try {
-            const AudioContext =
-              window.AudioContext || window.webkitAudioContext;
-            if (!AudioContext) return;
-
-            const ctx = new AudioContext();
-            const now = ctx.currentTime;
-
-            // Hàm tạo 1 tiếng bíp
-            const playBeep = (startTime) => {
-              const osc = ctx.createOscillator();
-              const gain = ctx.createGain();
-
-              osc.connect(gain);
-              gain.connect(ctx.destination);
-
-              // Cấu hình âm thanh: Sine wave (sóng hình sin) nghe giống tiếng chuông
-              osc.type = "sine";
-              osc.frequency.value = 1200; // Tần số cao (1200Hz) nghe cho rõ
-
-              // VOLUME MAX (1.0)
-              gain.gain.setValueAtTime(1.0, startTime);
-              // Hiệu ứng fade out nhanh để tạo tiếng "Ting" gọn gàng
-              gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.2);
-
-              osc.start(startTime);
-              osc.stop(startTime + 0.25);
-            };
-
-            // LẶP LẠI 5 LẦN
-            for (let i = 0; i < 5; i++) {
-              // Mỗi tiếng cách nhau 0.3 giây
-              playBeep(now + i * 0.3);
-            }
-          } catch (e) {
-            console.error("Audio error:", e);
-          }
-        },
-      });
-    }
-  } catch (e) {
-    console.error("Không thể phát âm thanh:", e);
-  }
-}
+// Memory to prevent duplicate downloads in same session
+let sessionHistory = new Set();
 
 // =========================================================
-// 2. FILE NAMING LOGIC
+// 1. MESSAGING & LOGIC
 // =========================================================
-
-function generateFilename(pattern, index, extension, dateObj) {
-  const yyyy = dateObj.getFullYear();
-  const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
-  const dd = String(dateObj.getDate()).padStart(2, "0");
-  const dateStr = `${yyyy}-${mm}-${dd}`;
-
-  const hh = String(dateObj.getHours()).padStart(2, "0");
-  const min = String(dateObj.getMinutes()).padStart(2, "0");
-  const timeStr = `${hh}h${min}`;
-
-  let finalName = pattern || "video_{index}";
-  finalName = finalName.replace(/{index}/g, index);
-  finalName = finalName.replace(/{date}/g, dateStr);
-  finalName = finalName.replace(/{time}/g, timeStr);
-
-  finalName = finalName.replace(/[<>:"/\\|?*]+/g, "_");
-  return `${finalName}.${extension}`;
-}
-
-// =========================================================
-// 3. MAIN LOGIC
-// =========================================================
-
-let totalFilesInitial = 0;
-let downloadedHistory = new Set(); // Bộ nhớ chống trùng lặp
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === "save_config") {
-    currentConfig = request.config;
-  }
+    // 1. Save Config
+    if (request.action === "save_config") {
+        currentConfig = request.config;
+    }
 
-  if (request.action === "finished_scan_data") {
-    const links = request.links;
-    if (!links || links.length === 0) return;
+    // 2. Receive Data -> Start Queue
+    if (request.action === "finished_scan_data") {
+        const links = request.links;
+        if (!links || links.length === 0) return;
 
-    // Reset trạng thái
-    isBatchRunning = true;
-    totalFilesInitial = 0;
+        // Reset for new batch
+        isBatchRunning = true;
+        totalFilesInitial = 0;
+        
+        // Reverse to download oldest content (bottom) as #1
+        links.reverse().forEach((url, index) => {
+            if (sessionHistory.has(url)) return;
+            sessionHistory.add(url);
 
-    if (currentConfig.mode === "fast") MAX_CONCURRENT = 5;
-    else MAX_CONCURRENT = 3;
-
-    const now = new Date();
-
-    links.forEach((url, index) => {
-      // -- CHỐNG TRÙNG LẶP --
-      if (downloadedHistory.has(url)) return;
-      downloadedHistory.add(url);
-      // ---------------------
-
-      const fileNumber = index + 1;
-      let extension = "mp4";
-      if (url.includes(".gif")) extension = "gif";
-      else if (url.includes(".webp")) extension = "webp";
-
-      const fileNameOnly = generateFilename(
-        currentConfig.pattern,
-        fileNumber,
-        extension,
-        now
-      );
-      const fullPath = `${currentConfig.folder}/${fileNameOnly}`;
-
-      // Check trùng trong queue hiện tại (đề phòng)
-      const exists = downloadQueue.some((item) => item.url === url);
-      if (!exists) {
-        downloadQueue.push({
-          url: url,
-          filename: fullPath,
-          saveAs: currentConfig.saveAs,
+            const fileNumber = index + 1;
+            const filename = buildPath(url, fileNumber);
+            
+            downloadQueue.push({ url, filename });
+            totalFilesInitial++;
         });
-        totalFilesInitial++;
-      }
-    });
 
-    updateBadge();
-    processQueue();
-  }
+        updateBadge();
+        processQueue();
+    }
+    
+    // 3. Kill Switch
+    if (request.action === "kill_process") {
+        downloadQueue = [];
+        isBatchRunning = false;
+        updateBadge();
+        // Optional: Cancel active downloads (requires ID tracking, simpler to just stop queue)
+    }
 });
 
-function updateBadge() {
-  const count = downloadQueue.length + activeDownloads;
-  if (count > 0) {
-    chrome.action.setBadgeText({ text: String(count) });
-    chrome.action.setBadgeBackgroundColor({ color: "#00b894" });
-  } else {
-    chrome.action.setBadgeText({ text: "" });
-  }
-}
+// =========================================================
+// 2. QUEUE PROCESSING
+// =========================================================
 
 function processQueue() {
-  if (activeDownloads === 0 && downloadQueue.length === 0) {
-    if (isBatchRunning) {
-      isBatchRunning = false;
-      updateBadge();
-      // Chỉ thông báo nếu thực sự có tải file mới
-      if (totalFilesInitial > 0) {
-        showFinishedNotification(totalFilesInitial);
-      }
+    // Check if finished
+    if (activeDownloads === 0 && downloadQueue.length === 0) {
+        if (isBatchRunning) {
+            isBatchRunning = false;
+            updateBadge();
+            if (totalFilesInitial > 0) notifySuccess(totalFilesInitial);
+        }
+        return;
     }
-    return;
-  }
 
-  if (activeDownloads >= MAX_CONCURRENT || downloadQueue.length === 0) {
-    return;
-  }
-
-  const item = downloadQueue.shift();
-  activeDownloads++;
-  updateBadge();
-
-  chrome.downloads.download(
-    {
-      url: item.url,
-      filename: item.filename,
-      conflictAction: "uniquify",
-      saveAs: item.saveAs,
-    },
-    (downloadId) => {
-      if (chrome.runtime.lastError) {
-        console.error(`Lỗi tải: ${item.filename}`, chrome.runtime.lastError);
-        activeDownloads--;
-        processQueue();
-      }
+    // Check concurrency limit
+    if (activeDownloads >= MAX_CONCURRENT || downloadQueue.length === 0) {
+        return;
     }
-  );
 
-  processQueue();
+    // Start download
+    const item = downloadQueue.shift();
+    activeDownloads++;
+    updateBadge();
+
+    chrome.downloads.download({
+        url: item.url,
+        filename: item.filename,
+        conflictAction: 'uniquify',
+        saveAs: false // Always auto-save in PRO mode
+    }, (downloadId) => {
+        if (chrome.runtime.lastError) {
+            console.warn(`Download failed: ${item.url}`, chrome.runtime.lastError);
+            activeDownloads--; 
+            processQueue(); 
+        }
+    });
+
+    // Try to spawn more threads if available
+    processQueue();
 }
 
 chrome.downloads.onChanged.addListener((delta) => {
-  if (delta.state) {
-    if (
-      delta.state.current === "complete" ||
-      delta.state.current === "interrupted"
-    ) {
-      activeDownloads--;
-      if (activeDownloads < 0) activeDownloads = 0;
-      updateBadge();
-      processQueue();
+    if (delta.state && (delta.state.current === 'complete' || delta.state.current === 'interrupted')) {
+        activeDownloads--;
+        if (activeDownloads < 0) activeDownloads = 0;
+        updateBadge();
+        processQueue();
     }
-  }
 });
+
+function updateBadge() {
+    const remaining = downloadQueue.length + activeDownloads;
+    if (remaining > 0) {
+        chrome.action.setBadgeText({ text: String(remaining) });
+        chrome.action.setBadgeBackgroundColor({ color: "#16C3DE" });
+    } else {
+        chrome.action.setBadgeText({ text: "" });
+    }
+}
+
+// =========================================================
+// 3. UTILITIES (Naming & Sound)
+// =========================================================
+
+function buildPath(url, index) {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
+
+    // Extension detection
+    let ext = 'mp4';
+    if (url.includes('.gif')) ext = 'gif';
+    else if (url.includes('.webp')) ext = 'webp';
+
+    let name = currentConfig.pattern || "video_{index}";
+    name = name.replace(/{index}/g, index)
+               .replace(/{date}/g, `${yyyy}-${mm}-${dd}`)
+               .replace(/{time}/g, `${hh}h${min}`);
+    
+    // Sanitize filename
+    name = name.replace(/[<>:"/\\|?*]+/g, '_');
+    
+    return `${currentConfig.folder}/${name}.${ext}`;
+}
+
+function notifySuccess(count) {
+    chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'icon128.png',
+        title: 'Flow Downloader Completed',
+        message: `✅ Thành công! Đã lưu ${count} video vào máy.`,
+        priority: 2
+    });
+    playSuccessSound();
+}
+
+async function playSuccessSound() {
+    try {
+        const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+        if (tab) {
+            chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                func: () => {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = "sine";
+                    osc.frequency.setValueAtTime(500, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.5);
+                }
+            });
+        }
+    } catch(e) {} // Ignore audio errors
+}

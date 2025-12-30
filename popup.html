@@ -2,125 +2,104 @@
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
-    <title>Flow Downloader</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flow Downloader Ultimate</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap&subset=vietnamese" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div class="bg-blob"></div>
+    <div class="noise-overlay"></div>
+    <div class="ambient-glow glow-teal"></div>
+    <div class="ambient-glow glow-lime"></div>
 
-    <header class="header">
-      <div class="help-wrapper">
-        <div id="helpBtn" class="help-btn">?</div>
-        <div id="helpTooltip" class="tooltip">
-          <div class="tooltip-header">Mẹo đặt tên file</div>
-          <ul class="step-list">
-            <li><code>{index}</code> : Số thứ tự (1, 2, 3...)</li>
-            <li><code>{date}</code> : Ngày hôm nay</li>
-            <li><code>{time}</code> : Giờ hiện tại</li>
-          </ul>
+    <div class="main-wrapper">
+      
+      <header class="app-header fade-in-up" style="--d: 0.1s">
+        <div class="brand-block">
+          <div class="logo-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+          </div>
+          <div class="title-wrapper">
+            <h1>Flow Downloader</h1>
+            <span class="badge-pro">ULTRA</span>
+          </div>
         </div>
-      </div>
+        
+        <div class="actions">
+          <button id="helpBtn" class="btn-icon" aria-label="Hướng dẫn">?</button>
+          <div id="helpTooltip" class="glass-tooltip">
+            <div class="tt-title">SHORTCODES</div>
+            <div class="tt-grid">
+              <div class="tt-item"><code>{index}</code> <span>Số thứ tự</span></div>
+              <div class="tt-item"><code>{date}</code> <span>Ngày tải</span></div>
+              <div class="tt-item"><code>{time}</code> <span>Giờ tải</span></div>
+            </div>
+          </div>
+        </div>
+      </header>
 
-      <div class="logo-area">
-        <div class="logo-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-        </div>
-        <div class="logo-text">
-          <h1>Flow Downloader</h1>
-          <span class="badge">EASY</span>
-        </div>
-      </div>
-      <div class="sub-title">Product of Tandev.foto Studio</div>
-    </header>
-
-    <main class="container">
-      <div class="card glass-effect">
-        <div class="input-group">
-          <label for="folderName">Lưu vào thư mục tên gì?</label>
-          <div class="input-wrapper">
-            <input type="text" id="folderName" placeholder="Ví dụ: Du_Lich_Da_Lat" value="" autocomplete="off" />
-            <span class="input-icon">📁</span>
+      <main class="control-panel fade-in-up" style="--d: 0.2s">
+        
+        <div class="field-group">
+          <label>Lưu vào thư mục</label>
+          <div class="input-container">
+            <span class="input-icon">📂</span>
+            <input type="text" id="folderName" placeholder="VD: TikTok_Videos" autocomplete="off" spellcheck="false" />
+            <button id="btnSettings" class="btn-mini" title="Cài đặt">⚙️</button>
           </div>
         </div>
 
-        <div class="input-group" style="margin-top: 15px">
-          <label for="filePattern">
-            Đặt tên file như thế nào?
-            <span class="info-badge">Hot</span>
-          </label>
-          <div class="input-wrapper">
-            <input type="text" id="filePattern" placeholder="Ví dụ: Video_cua_Tan_{index}" value="" autocomplete="off" />
-            <span class="input-icon">✎</span>
+        <div class="field-group">
+          <div class="label-split">
+            <label>Tên file mẫu</label>
+            <span id="filenamePreview" class="preview-tag">video_1.mp4</span>
           </div>
-          <div class="preview-box">
-            Kết quả mẫu:
-            <span id="filenamePreview" class="preview-text">video_1.mp4</span>
+          <div class="input-container">
+            <span class="input-icon">✨</span>
+            <input type="text" id="filePattern" placeholder="video_{index}" autocomplete="off" spellcheck="false" />
+          </div>
+        </div>
+        
+        <input type="checkbox" id="askSave" style="display:none">
+      </main>
+
+      <footer class="bottom-area fade-in-up" style="--d: 0.3s">
+        
+        <div id="statusBox" class="status-bar">
+          <div class="status-indicator">
+            <div class="dot-pulse"></div>
+          </div>
+          <div class="status-content">
+            <span id="statusText">Hệ thống sẵn sàng</span>
+            <div class="meta-info">Detected: <b id="countDisplay">0</b> items</div>
           </div>
         </div>
 
-        <div class="input-group" style="margin-top: 15px">
-          <label for="downloadMode">Tốc độ tải</label>
-          <div class="input-wrapper">
-            <select id="downloadMode">
-              <option value="fast">⚡ Nhanh (Dành cho ít video)</option>
-              <option value="safe" selected>🛡️ Ổn định (Dành cho >50 video)</option>
-            </select>
-            <span class="select-arrow">▼</span>
+        <div class="action-stack">
+          <button id="btnStart" class="btn-primary">
+            <span class="btn-text">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+              QUÉT & TẢI NGAY
+            </span>
+            <div class="btn-shimmer"></div>
+          </button>
+
+          <div class="running-group" id="runningGroup" style="display: none;">
+             <button id="btnStop" class="btn-secondary">✋ Dừng & Lưu</button>
+             <button id="btnKill" class="btn-danger" title="Hủy bỏ">✕</button>
           </div>
         </div>
 
-        <div class="divider"></div>
-
-        <button id="btnSettings" class="btn-settings-internal">
-          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-          </svg>
-          Đổi thư mục lưu mặc định của Chrome
-        </button>
-
-        <div class="switch-row">
-          <div class="switch-info">
-            <span class="switch-title">Hỏi vị trí lưu từng file?</span>
-            <span class="switch-desc">Tắt đi để tải tự động hoàn toàn</span>
-          </div>
-          <div class="toggle-wrapper">
-            <input type="checkbox" id="askSave" />
-            <label for="askSave" class="toggle-btn"></label>
-          </div>
-        </div>
-      </div>
-
-      <div class="action-area">
-        <button id="btnStart" class="btn btn-primary shimmer">
-          <span class="icon">🚀</span> BẮT ĐẦU QUÉT & TẢI
-        </button>
-
-        <button id="btnStop" class="btn btn-danger shimmer" style="display: none">
-          <span class="icon">⏹</span> DỪNG QUÉT
-        </button>
-      </div>
-
-      <div id="statusBox" class="status-container">
-        <div class="pulse-ring"></div>
-        <div class="status-content">
-          <span id="statusText">Sẵn sàng</span>
-          <div class="counter-box"><span id="countDisplay">0</span></div>
-        </div>
-      </div>
-
-      <footer class="footer">Designed by <b>Tandev.foto</b></footer>
-    </main>
-
+        <div class="footer-credit">Designed by <span class="highlight">Tandev.foto</span></div>
+      </footer>
+    </div>
+    
     <script src="popup.js"></script>
   </body>
 </html>
