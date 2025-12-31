@@ -29,18 +29,14 @@ body {
   margin: 0; padding: 0;
   background-color: var(--bg-deep);
   color: var(--text-primary);
-  /* FONT STACK CAO CẤP: Không bao giờ lỗi font */
   font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
 }
 
-/* QUAN TRỌNG: Fix lỗi font trên Input/Button */
-input, button, select, textarea {
-  font-family: inherit; 
-}
+input, button, select, textarea { font-family: inherit; }
 
-/* --- 3. BACKGROUND AMBIENCE (Texture & Glow) --- */
+/* --- 3. BACKGROUND AMBIENCE --- */
 .noise-overlay {
   position: fixed; inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
@@ -60,20 +56,22 @@ input, button, select, textarea {
   min-height: 100vh;
 }
 
-/* --- 4. ANIMATIONS (Entry Effects) --- */
+/* --- 4. ANIMATIONS --- */
 .fade-in-up {
   opacity: 0; transform: translateY(10px);
   animation: fadeSlideUp 0.6s var(--ease-smooth) forwards;
   animation-delay: var(--d);
 }
-@keyframes fadeSlideUp {
-  to { opacity: 1; transform: translateY(0); }
-}
+@keyframes fadeSlideUp { to { opacity: 1; transform: translateY(0); } }
 
-/* --- 5. HEADER --- */
+/* --- 5. HEADER (FIXED Z-INDEX) --- */
 .app-header {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 24px;
+  
+  /* FIX: Đảm bảo Header luôn nằm trên Control Panel để Tooltip hiển thị */
+  position: relative; 
+  z-index: 50; 
 }
 .brand-block { display: flex; align-items: center; gap: 12px; }
 
@@ -172,9 +170,7 @@ input, button, select, textarea {
   background: rgba(0,0,0,0.45); border-color: var(--accent-teal);
   box-shadow: 0 0 0 3px rgba(33, 166, 145, 0.15);
 }
-.input-container input:hover:not(:focus) {
-  border-color: rgba(255,255,255,0.2);
-}
+.input-container input:hover:not(:focus) { border-color: rgba(255,255,255,0.2); }
 .input-container input:focus + .btn-mini,
 .input-container input:focus ~ .input-icon { opacity: 1; color: var(--accent-teal); }
 
@@ -185,6 +181,20 @@ input, button, select, textarea {
   transition: 0.2s;
 }
 .btn-mini:hover { background: var(--accent-teal); color: var(--bg-deep); }
+
+/* FIX: Hiệu ứng lỗi Input */
+.input-error {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.05) !important;
+  color: #ef4444 !important;
+  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
 
 /* --- 7. STATUS & FOOTER --- */
 .bottom-area { margin-top: auto; }
@@ -216,8 +226,8 @@ input, button, select, textarea {
 .meta-info { font-size: 10px; color: var(--text-secondary); }
 #countDisplay { color: var(--accent-lime); margin-left: 2px; font-size: 11px; }
 
-/* Buttons */
-.action-stack { position: relative; height: 50px; } /* Fixed height to prevent jump */
+/* Buttons & Stack */
+.action-stack { position: relative; height: 50px; }
 
 .btn-primary {
   width: 100%; border: none; padding: 0; height: 50px;
@@ -234,7 +244,21 @@ input, button, select, textarea {
 }
 .btn-primary:active { transform: scale(0.98); }
 
-.btn-text { position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; height: 100%; }
+/* FIX: Trạng thái Disabled */
+button:disabled, .btn-primary.disabled {
+  opacity: 0.6; cursor: not-allowed; filter: grayscale(0.8);
+  pointer-events: none; transform: none !important; box-shadow: none !important;
+}
+
+.btn-text { position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  
+ 
+  width: 100%; }
 
 .btn-shimmer {
   position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
@@ -242,20 +266,33 @@ input, button, select, textarea {
   transform: skewX(-20deg); animation: shimmer 3s infinite; z-index: 1;
 }
 
-.running-group { display: flex; gap: 8px; width: 100%; height: 50px; }
-.btn-secondary {
-  flex: 1; background: transparent; border: 1px solid rgba(255,255,255,0.2);
-  color: #fff; font-weight: 700; border-radius: 12px; cursor: pointer;
-  transition: 0.2s; font-size: 13px;
+/* FIX: Cân chỉnh Running Group & Secondary Buttons */
+.running-group { 
+  display: flex; gap: 10px; width: 100%; height: 50px; 
 }
-.btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: #fff; }
+
+.btn-secondary {
+  flex: 1; 
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e2e8f0; font-weight: 600; border-radius: 12px; cursor: pointer;
+  transition: all 0.2s; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-secondary:hover { 
+  background: rgba(255, 255, 255, 0.1); border-color: var(--accent-teal); color: #fff; 
+}
 
 .btn-danger {
-  width: 50px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.5);
-  color: #ef4444; border-radius: 12px; cursor: pointer; font-size: 18px;
-  transition: 0.2s; display: flex; align-items: center; justify-content: center;
+  width: 54px; 
+  background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444; border-radius: 12px; cursor: pointer; font-size: 16px;
+  transition: all 0.2s; display: flex; align-items: center; justify-content: center;
 }
-.btn-danger:hover { background: #ef4444; color: #fff; }
+.btn-danger:hover { 
+  background: #ef4444; color: #fff; transform: scale(1.05); 
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
 
 .footer-credit { text-align: center; font-size: 10px; color: rgba(255,255,255,0.25); margin-top: 16px; }
 .highlight { color: var(--accent-teal); font-weight: 600; }
