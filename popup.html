@@ -1,105 +1,122 @@
 <!DOCTYPE html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Flow Downloader Ultimate</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap&subset=vietnamese" rel="stylesheet" />
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <div class="noise-overlay"></div>
-    <div class="ambient-glow glow-teal"></div>
-    <div class="ambient-glow glow-lime"></div>
-
-    <div class="main-wrapper">
-      
-      <header class="app-header fade-in-up" style="--d: 0.1s">
-        <div class="brand-block">
-          <div class="logo-box">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-          </div>
-          <div class="title-wrapper">
-            <h1>Flow Downloader</h1>
-            <span class="badge-pro">ULTRA</span>
-          </div>
-        </div>
-        
-        <div class="actions">
-          <button id="helpBtn" class="btn-icon" aria-label="Hướng dẫn">?</button>
-          <div id="helpTooltip" class="glass-tooltip">
-            <div class="tt-title">SHORTCODES</div>
-            <div class="tt-grid">
-              <div class="tt-item"><code>{index}</code> <span>Số thứ tự</span></div>
-              <div class="tt-item"><code>{date}</code> <span>Ngày tải</span></div>
-              <div class="tt-item"><code>{time}</code> <span>Giờ tải</span></div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tandev Ultimate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="brand">
+                <span class="material-icons-round brand-icon">hub</span>
+                <div>
+                    <h1>Tandev Suite</h1>
+                    <span class="badge">ULTRA V5</span>
+                </div>
             </div>
-          </div>
-        </div>
-      </header>
-
-      <main class="control-panel fade-in-up" style="--d: 0.2s">
-        
-        <div class="field-group">
-          <label>Lưu vào thư mục</label>
-          <div class="input-container">
-            <span class="input-icon">📂</span>
-            <input type="text" id="folderName" placeholder="VD: TikTok_Videos" autocomplete="off" spellcheck="false" />
-            <button id="btnSettings" class="btn-mini" title="Cài đặt">⚙️</button>
-          </div>
         </div>
 
-        <div class="field-group">
-          <div class="label-split">
-            <label>Tên file mẫu</label>
-            <span id="filenamePreview" class="preview-tag">video_1.mp4</span>
-          </div>
-          <div class="input-container">
-            <span class="input-icon">✨</span>
-            <input type="text" id="filePattern" placeholder="video_{index}" autocomplete="off" spellcheck="false" />
-          </div>
-        </div>
-        
-        <input type="checkbox" id="askSave" style="display:none">
-      </main>
-
-      <footer class="bottom-area fade-in-up" style="--d: 0.3s">
-        
-        <div id="statusBox" class="status-bar">
-          <div class="status-indicator">
-            <div class="dot-pulse"></div>
-          </div>
-          <div class="status-content">
-            <span id="statusText">Hệ thống sẵn sàng</span>
-            <div class="meta-info">Detected: <b id="countDisplay">0</b> items</div>
-          </div>
+        <div class="tab-nav">
+            <button class="tab-btn active" data-target="tab-flow">
+                <span class="material-icons-round">auto_fix_high</span> Flow Auto
+            </button>
+            <button class="tab-btn" data-target="tab-down">
+                <span class="material-icons-round">download</span> Downloader
+            </button>
         </div>
 
-        <div class="action-stack">
-          <button id="btnStart" class="btn-primary">
-            <span class="btn-text">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
-              QUÉT & TẢI NGAY
-            </span>
-            <div class="btn-shimmer"></div>
-          </button>
+        <div id="tab-flow" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <span class="material-icons-round">image</span>
+                    <h3>1. Chọn Hình Ảnh</h3>
+                </div>
+                <div class="file-upload-wrapper">
+                    <input type="file" id="flow_imageInput" multiple accept="image/*" class="file-input" hidden>
+                    <label for="flow_imageInput" class="file-label">
+                        <span class="material-icons-round">folder_open</span>
+                        <span id="flow_fileLabelText">Chọn folder ảnh...</span>
+                    </label>
+                    <div class="badge-count" id="flow_imageCount">0</div>
+                </div>
+            </div>
 
-          <div class="running-group" id="runningGroup" style="display: none;">
-             <button id="btnStop" class="btn-secondary">✋ Dừng & Lưu</button>
-             <button id="btnKill" class="btn-danger" title="Hủy bỏ">✕</button>
-          </div>
+            <div class="card">
+                <div class="card-header">
+                    <span class="material-icons-round">description</span>
+                    <h3>2. Nhập Prompt</h3>
+                </div>
+                <textarea id="flow_promptInput" placeholder="Dán danh sách prompt vào đây..." spellcheck="false"></textarea>
+                <div class="meta-right" id="flow_promptCount">0 dòng</div>
+            </div>
+
+            <div class="status-box">
+                <div class="status-row">
+                    <span id="flow_statusText">Sẵn sàng</span>
+                    <span id="flow_timeInfo">--:--</span>
+                </div>
+                <div class="progress-bg"><div id="flow_progressBar" class="progress-fill"></div></div>
+            </div>
+
+            <div class="action-row">
+                <button id="flow_startBtn" class="btn btn-primary">
+                    <span class="material-icons-round">play_arrow</span> CHẠY FLOW
+                </button>
+                <button id="flow_stopBtn" class="btn btn-danger icon-only">
+                    <span class="material-icons-round">stop</span>
+                </button>
+            </div>
         </div>
 
-        <div class="footer-credit">Designed by <span class="highlight">Tandev.foto</span></div>
-      </footer>
+        <div id="tab-down" class="tab-content">
+            <div class="card">
+                <div class="field-group">
+                    <label>Lưu vào thư mục</label>
+                    <div class="input-with-icon">
+                        <span class="material-icons-round">folder</span>
+                        <input type="text" id="down_folderName" placeholder="VD: TikTok_Videos" autocomplete="off" style="padding-right: 40px;">
+                        <button id="down_openSettings" class="btn-settings" title="Cài đặt lưu trữ">
+                            <span class="material-icons-round">settings</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label>Tên file mẫu <span id="down_filenamePreview" class="preview-tag">video_1.mp4</span></label>
+                    <div class="input-with-icon">
+                        <span class="material-icons-round">edit</span>
+                        <input type="text" id="down_filePattern" placeholder="video_{index}" autocomplete="off">
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-box" id="down_statusBox">
+                <div class="status-row">
+                    <span id="down_statusText">Hệ thống sẵn sàng</span>
+                    <span>Detected: <b id="down_countDisplay" style="color:var(--accent)">0</b></span>
+                </div>
+            </div>
+
+            <div class="action-stack">
+                <button id="down_btnStart" class="btn btn-primary">
+                    <span class="material-icons-round">download</span> QUÉT & TẢI NGAY
+                </button>
+                
+                <div id="down_runningGroup" class="hidden-group" style="display:none; gap:10px; margin-top:10px">
+                    <button id="down_btnStop" class="btn btn-secondary">Dừng & Lưu</button>
+                    <button id="down_btnKill" class="btn btn-danger icon-only">✕</button>
+                </div>
+            </div>
+        </div>
+
     </div>
-    
-    <script src="popup.js"></script>
-  </body>
+
+    <script src="tabs.js"></script>
+    <script src="flow_logic.js"></script>
+    <script src="down_logic.js"></script>
+</body>
 </html>

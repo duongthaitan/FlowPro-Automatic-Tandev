@@ -1,27 +1,28 @@
 {
   "manifest_version": 3,
-  "name": "Flow Downloader Auto | Tandev.foto",
-  "version": "2.0.0",
-  "description": "Premium Video Downloader - High Performance Core.",
+  "name": "Tandev Ultimate Suite",
+  "version": "5.0.0",
+  "description": "All-in-One: Flow Auto & Video Downloader",
   "permissions": [
     "activeTab",
     "scripting",
     "downloads",
-    "notifications"
+    "notifications",
+    "storage"
   ],
   "host_permissions": [
     "<all_urls>"
   ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Tandev Suite"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
   "icons": {
     "16": "icon16.png",
     "32": "icon32.png",
     "128": "icon128.png"
-  },
-  "action": {
-    "default_popup": "popup.html",
-    "default_title": "Flow Downloader"
-  },
-  "background": {
-    "service_worker": "background.js"
   }
 }

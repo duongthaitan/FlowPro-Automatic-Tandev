@@ -1,42 +1,34 @@
 // =========================================================
-// BACKGROUND WORKER | Flow Downloader Auto
+// BACKGROUND WORKER | Tandev Ultimate Suite
 // =========================================================
 
 let downloadQueue = [];
 let activeDownloads = 0;
-const MAX_CONCURRENT = 5; // Optimized for Speed (Default)
+const MAX_CONCURRENT = 5; 
 let isBatchRunning = false;
 let totalFilesInitial = 0;
 
-// Default Config
 let currentConfig = {
     folder: "Flow_Videos",
     pattern: "video_{index}"
 };
 
-// Memory to prevent duplicate downloads in same session
 let sessionHistory = new Set();
 
-// =========================================================
-// 1. MESSAGING & LOGIC
-// =========================================================
-
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    // 1. Save Config
+    // 1. Lưu cấu hình
     if (request.action === "save_config") {
         currentConfig = request.config;
     }
 
-    // 2. Receive Data -> Start Queue
+    // 2. Nhận dữ liệu -> Bắt đầu hàng đợi
     if (request.action === "finished_scan_data") {
         const links = request.links;
         if (!links || links.length === 0) return;
 
-        // Reset for new batch
         isBatchRunning = true;
         totalFilesInitial = 0;
         
-        // Reverse to download oldest content (bottom) as #1
         links.reverse().forEach((url, index) => {
             if (sessionHistory.has(url)) return;
             sessionHistory.add(url);
@@ -52,21 +44,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         processQueue();
     }
     
-    // 3. Kill Switch
+    // 3. Hủy tiến trình
     if (request.action === "kill_process") {
         downloadQueue = [];
         isBatchRunning = false;
         updateBadge();
-        // Optional: Cancel active downloads (requires ID tracking, simpler to just stop queue)
     }
 });
 
-// =========================================================
-// 2. QUEUE PROCESSING
-// =========================================================
-
 function processQueue() {
-    // Check if finished
     if (activeDownloads === 0 && downloadQueue.length === 0) {
         if (isBatchRunning) {
             isBatchRunning = false;
@@ -76,12 +62,10 @@ function processQueue() {
         return;
     }
 
-    // Check concurrency limit
     if (activeDownloads >= MAX_CONCURRENT || downloadQueue.length === 0) {
         return;
     }
 
-    // Start download
     const item = downloadQueue.shift();
     activeDownloads++;
     updateBadge();
@@ -90,16 +74,15 @@ function processQueue() {
         url: item.url,
         filename: item.filename,
         conflictAction: 'uniquify',
-        saveAs: false // Always auto-save in PRO mode
+        saveAs: false 
     }, (downloadId) => {
         if (chrome.runtime.lastError) {
-            console.warn(`Download failed: ${item.url}`, chrome.runtime.lastError);
+            console.warn(`Lỗi tải: ${item.url}`, chrome.runtime.lastError);
             activeDownloads--; 
             processQueue(); 
         }
     });
 
-    // Try to spawn more threads if available
     processQueue();
 }
 
@@ -116,15 +99,11 @@ function updateBadge() {
     const remaining = downloadQueue.length + activeDownloads;
     if (remaining > 0) {
         chrome.action.setBadgeText({ text: String(remaining) });
-        chrome.action.setBadgeBackgroundColor({ color: "#16C3DE" });
+        chrome.action.setBadgeBackgroundColor({ color: "#21A691" });
     } else {
         chrome.action.setBadgeText({ text: "" });
     }
 }
-
-// =========================================================
-// 3. UTILITIES (Naming & Sound)
-// =========================================================
 
 function buildPath(url, index) {
     const now = new Date();
@@ -134,7 +113,6 @@ function buildPath(url, index) {
     const hh = String(now.getHours()).padStart(2, '0');
     const min = String(now.getMinutes()).padStart(2, '0');
 
-    // Extension detection
     let ext = 'mp4';
     if (url.includes('.gif')) ext = 'gif';
     else if (url.includes('.webp')) ext = 'webp';
@@ -144,7 +122,6 @@ function buildPath(url, index) {
                .replace(/{date}/g, `${yyyy}-${mm}-${dd}`)
                .replace(/{time}/g, `${hh}h${min}`);
     
-    // Sanitize filename
     name = name.replace(/[<>:"/\\|?*]+/g, '_');
     
     return `${currentConfig.folder}/${name}.${ext}`;
@@ -153,35 +130,9 @@ function buildPath(url, index) {
 function notifySuccess(count) {
     chrome.notifications.create({
         type: 'basic',
-        iconUrl: 'icon128.png',
-        title: 'Flow Downloader Completed',
-        message: `✅ Thành công! Đã lưu ${count} video vào máy.`,
+        iconUrl: 'icons/icon128.png', // Đảm bảo bạn có file icon
+        title: 'Tandev Downloader',
+        message: `✅ Đã tải xong ${count} video!`,
         priority: 2
     });
-    playSuccessSound();
-}
-
-async function playSuccessSound() {
-    try {
-        const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-        if (tab) {
-            chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                func: () => {
-                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.type = "sine";
-                    osc.frequency.setValueAtTime(500, ctx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.1);
-                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-                    osc.start();
-                    osc.stop(ctx.currentTime + 0.5);
-                }
-            });
-        }
-    } catch(e) {} // Ignore audio errors
 }
