@@ -1,8 +1,3 @@
-Dưới đây là file `README.md` được viết chuẩn theo phong cách template bạn yêu cầu, cập nhật thông tin chính xác cho phiên bản **Tandev Ultimate Suite V5** (gộp 2 tính năng Flow Auto & Downloader).
-
-Bạn hãy tạo file tên là `README.md` và dán nội dung này vào nhé:
-
-```markdown
 <div align="center">
 
   <img src="icon128.png" alt="logo" width="100" height="100" />
